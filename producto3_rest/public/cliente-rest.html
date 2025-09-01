@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Cliente REST - Pagarés</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #ffe6f0;
+      padding: 20px;
+    }
+    h1, h2 {
+      color: #d63384;
+    }
+    input, button {
+      margin: 5px;
+      padding: 8px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #ffb3cc;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #ff80aa;
+    }
+    .section {
+      margin-bottom: 20px;
+      padding: 10px;
+      background-color: #fff0f5;
+      border-radius: 10px;
+    }
+    pre {
+      background-color: #fff;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Gestión de Pagarés - Cliente REST</h1>
+
+  <div class="section">
+    <h2>Registrar Pagaré</h2>
+    <input type="number" id="monto" placeholder="Monto">
+    <input type="number" id="meses" placeholder="Meses">
+    <button onclick="registrarPagare()">Registrar</button>
+  </div>
+
+  <div class="section">
+    <h2>Consultar Pagaré</h2>
+    <input type="number" id="idConsulta" placeholder="ID del pagaré">
+    <button onclick="consultarPagare()">Consultar</button>
+  </div>
+  <div class="section">
+  <h2>Descargar PDF</h2>
+  <input type="number" id="idPDF" placeholder="ID del pagaré">
+  <button onclick="descargarPDF()">Descargar</button>
+</div>
+
+
+  <div class="section">
+    <h2>Modificar Pagaré</h2>
+    <input type="number" id="idModificar" placeholder="ID">
+    <input type="number" id="nuevoMonto" placeholder="Nuevo monto">
+    <input type="number" id="nuevosMeses" placeholder="Nuevos meses">
+    <input type="text" id="nuevoStatus" placeholder="Nuevo status">
+    <button onclick="modificarPagare()">Modificar</button>
+  </div>
+
+  <div class="section">
+    <h2>Borrar Pagaré</h2>
+    <input type="number" id="idBorrar" placeholder="ID del pagaré">
+    <button onclick="borrarPagare()">Borrar</button>
+  </div>
+
+  <h2>Resultado</h2>
+  <pre id="resultado">Esperando respuesta...</pre>
+
+  <script>
+    const url = "http://localhost:3000/api/pagares";
+
+    function registrarPagare() {
+      const monto = parseFloat(document.getElementById('monto').value);
+      const meses = parseInt(document.getElementById('meses').value);
+
+      fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ monto, meses, status: "pendiente" })
+      })
+      .then(res => res.json())
+      .then(data => mostrarResultado(data))
+      .catch(err => mostrarError(err));
+    }
+
+    function consultarPagare() {
+      const id = document.getElementById('idConsulta').value;
+
+      fetch(`${url}/${id}`)
+        .then(res => res.json())
+        .then(data => mostrarResultado(data))
+        .catch(err => mostrarError(err));
+    }
+
+    function modificarPagare() {
+      const id = document.getElementById('idModificar').value;
+      const monto = parseFloat(document.getElementById('nuevoMonto').value);
+      const meses = parseInt(document.getElementById('nuevosMeses').value);
+      const status = document.getElementById('nuevoStatus').value;
+
+      fetch(`${url}/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ monto, meses, status })
+      })
+      .then(res => res.json())
+      .then(data => mostrarResultado(data))
+      .catch(err => mostrarError(err));
+    }
+
+    function borrarPagare() {
+      const id = document.getElementById('idBorrar').value;
+
+      fetch(`${url}/${id}`, { method: "DELETE" })
+        .then(res => res.text())
+        .then(data => mostrarResultado(data))
+        .catch(err => mostrarError(err));
+    }
+
+    function mostrarResultado(data) {
+      document.getElementById("resultado").textContent = JSON.stringify(data, null, 2);
+    }
+
+    function mostrarError(err) {
+      document.getElementById("resultado").textContent = "Error: " + err;
+    }
+
+    function descargarPDF() {
+  const id = document.getElementById('idPDF').value;
+  window.open(`http://localhost:3000/api/pagares/pdf/${id}`, '_blank');
+    }
+
+
+  </script>
+</body>
+</html>
